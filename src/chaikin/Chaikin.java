@@ -11,8 +11,9 @@ public class Chaikin extends JPanel {
 
     private List<Point> points = new ArrayList<>();
     private List<Point> last_points = new ArrayList<>();
-    private boolean draw = false;
-    private int steps = 0;
+    private boolean draw;
+    private int steps;
+    private boolean err;
 
     public Chaikin() {
         super.setBackground(Color.BLACK);
@@ -25,11 +26,11 @@ public class Chaikin extends JPanel {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                System.out.println("Mouse Clicked at: " + e.getX() + ", " + e.getY());
-                points.add(e.getPoint());
-                System.out.println(points);
-                repaint();
-
+                if (!draw) {
+                    points.add(e.getPoint());
+                    err = false;
+                    repaint();
+                }
             }
         });
 
@@ -38,12 +39,15 @@ public class Chaikin extends JPanel {
             public void keyPressed(KeyEvent e) {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_ENTER -> {
-                        System.out.println("Hello from Enter");
                         if (points.size() >= 2 && !draw) {
                             draw = true;
                             last_points = points;
                             repaint();
                             timer.start();
+                            err = false;
+                        } else if (points.size() == 0) {
+                            err = true;
+                            repaint();
                         }
                     }
                     case KeyEvent.VK_DELETE -> {
@@ -51,13 +55,13 @@ public class Chaikin extends JPanel {
                         last_points.clear();
                         draw = false;
                         steps = 0;
+                        err = false;
                         repaint();
                         timer.stop();
                     }
                     case KeyEvent.VK_ESCAPE -> {
                         System.out.println("GOODBYE FROM ..|-_-|.. ");
                         System.exit(0);
-                        
                     }
                 }
             }
@@ -79,8 +83,13 @@ public class Chaikin extends JPanel {
             Point end = new Point(
                     (int) ((p1.x * 0.25) + (p2.x * 0.75)),
                     (int) ((p1.y * 0.25) + (p2.y * 0.75)));
-            new_positions.add(start);
-            new_positions.add(end);
+            if (i != 0) {
+                new_positions.add(start);
+            }
+            if (i + 1 != len) {
+                new_positions.add(end);
+            }
+
         }
         new_positions.add(array.get(array.size() - 1));
         return new_positions;
@@ -90,23 +99,46 @@ public class Chaikin extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
+
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                 RenderingHints.VALUE_ANTIALIAS_ON);
-        g2d.setRenderingHint(RenderingHints.KEY_RENDERING,
-                RenderingHints.VALUE_RENDER_QUALITY);
-        g2d.setColor(Color.YELLOW);
 
+        if (steps == 7) {
+            steps = 0;
+            last_points = points;
+        }
+
+        g2d.setColor(Color.CYAN);
+        g2d.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 14));
+
+        String INSTRUCTIONS_DOUBLE = String.format("""
+                ╔════════════════════════╗
+                ║ Instructions:          ║
+                ╠════════════════════════╣
+                ║ Start Animation: Enter ║
+                ║ Reset: Delete          ║
+                ║ Exit: Escape           ║
+                ║ Step: %d                ║
+                ╚════════════════════════╝
+                """, steps + 1);
+        String[] lines = INSTRUCTIONS_DOUBLE.split("\n");
+
+        for (int i = 1; i <= lines.length; i++) {
+            g2d.drawString(lines[i - 1], 20, 15 * i);
+        }
+
+        if (err) {
+            g2d.setColor(Color.ORANGE);
+            String str = "||=> ERROR : pleas draw points before click Enter. <=||";
+            g2d.drawString(str, 20, getHeight() - 10);
+        }
+
+        g2d.setColor(Color.WHITE);
         for (Point point : points) {
             g2d.drawOval(point.x - 3, point.y - 3, 6, 6);
         }
 
         if (draw) {
-
-            if (steps == 7) {
-                steps = 0;
-                last_points = points;
-            }
-
             for (int i = 0; i < last_points.size() - 1; i++) {
                 Point p1 = last_points.get(i);
                 Point p2 = last_points.get(i + 1);
