@@ -19,7 +19,6 @@ public class Chaikin extends JPanel {
         setFocusable(true);
 
         Timer timer = new Timer(1000, e -> {
-
             repaint();
         });
 
@@ -55,6 +54,11 @@ public class Chaikin extends JPanel {
                         repaint();
                         timer.stop();
                     }
+                    case KeyEvent.VK_ESCAPE -> {
+                        System.out.println("GOODBYE FROM ..|-_-|.. ");
+                        System.exit(0);
+                        
+                    }
                 }
             }
         });
@@ -82,7 +86,6 @@ public class Chaikin extends JPanel {
         return new_positions;
     }
 
-
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -109,9 +112,10 @@ public class Chaikin extends JPanel {
                 Point p2 = last_points.get(i + 1);
                 g2d.drawLine(p1.x, p1.y, p2.x, p2.y);
             }
-
-            steps++;
-            last_points = chaikinAlgo(last_points);
+            if (last_points.size() > 2) {
+                steps++;
+                last_points = chaikinAlgo(last_points);
+            }
         }
     }
 
