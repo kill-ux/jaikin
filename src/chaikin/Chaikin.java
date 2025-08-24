@@ -91,6 +91,7 @@ public class Chaikin extends JPanel {
                     case KeyEvent.VK_DELETE -> {
                         points.clear();
                         last_points.clear();
+                        last_p = -1;
                         draw = false;
                         steps = 0;
                         err = false;
