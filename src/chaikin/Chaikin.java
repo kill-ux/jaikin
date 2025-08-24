@@ -61,7 +61,7 @@ public class Chaikin extends JPanel {
             @Override
             public void mouseDragged(MouseEvent e) {
                 if (last_p != -1) {
-                    points.get(last_p).setLocation(e.getPoint());
+                    points.set(last_p, e.getPoint());
                     List<Point> new_positions = points;
                     for (int i = 0; i < steps; i++) {
                         new_positions = chaikinAlgo(new_positions);
