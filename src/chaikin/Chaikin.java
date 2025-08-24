@@ -98,7 +98,6 @@ public class Chaikin extends JPanel {
                         timer.stop();
                     }
                     case KeyEvent.VK_ESCAPE -> {
-                        System.out.println("GOODBYE FROM ..|-_-|.. ");
                         System.exit(0);
                     }
                 }
