@@ -14,21 +14,59 @@ public class Chaikin extends JPanel {
     private boolean draw;
     private int steps;
     private boolean err;
+    private int last_p = -1;
 
     public Chaikin() {
         super.setBackground(Color.BLACK);
         setFocusable(true);
 
         Timer timer = new Timer(1000, e -> {
+            if (draw && points.size() > 2) {
+                steps++;
+            }
             repaint();
         });
 
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (!draw) {
-                    points.add(e.getPoint());
-                    err = false;
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    if (!draw) {
+                        points.add(e.getPoint());
+                        err = false;
+                        repaint();
+                    }
+                }
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                Point new_point = e.getPoint();
+                for (int i = 0; i < points.size(); i++) {
+                    if (points.get(i).distance(new_point) <= 6) {
+                        last_p = i;
+                        break;
+                    }
+                }
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                last_p = -1;
+            }
+        });
+
+        addMouseMotionListener(new MouseAdapter() {
+
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                if (last_p != -1) {
+                    points.get(last_p).setLocation(e.getPoint());
+                    List<Point> new_positions = points;
+                    for (int i = 0; i < steps; i++) {
+                        new_positions = chaikinAlgo(new_positions);
+                    }
+                    last_points = new_positions;
                     repaint();
                 }
             }
@@ -76,17 +114,17 @@ public class Chaikin extends JPanel {
         for (int i = 0; i < len; i++) {
             Point p1 = array.get(i);
             Point p2 = array.get(i + 1);
-            Point start = new Point(
-                    (int) ((p1.x * 0.75) + (p2.x * 0.25)),
-                    (int) ((p1.y * 0.75) + (p2.y * 0.25)));
 
-            Point end = new Point(
-                    (int) ((p1.x * 0.25) + (p2.x * 0.75)),
-                    (int) ((p1.y * 0.25) + (p2.y * 0.75)));
             if (i != 0) {
+                Point start = new Point(
+                        (int) ((p1.x * 0.75) + (p2.x * 0.25)),
+                        (int) ((p1.y * 0.75) + (p2.y * 0.25)));
                 new_positions.add(start);
             }
             if (i + 1 != len) {
+                Point end = new Point(
+                        (int) ((p1.x * 0.25) + (p2.x * 0.75)),
+                        (int) ((p1.y * 0.25) + (p2.y * 0.75)));
                 new_positions.add(end);
             }
 
@@ -145,7 +183,7 @@ public class Chaikin extends JPanel {
                 g2d.drawLine(p1.x, p1.y, p2.x, p2.y);
             }
             if (last_points.size() > 2) {
-                steps++;
+                // steps++;
                 last_points = chaikinAlgo(last_points);
             }
         }
